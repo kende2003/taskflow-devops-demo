@@ -1,3 +1,5 @@
+data "aws_caller_identity" "current" {}
+
 resource "aws_kms_key" "eks" {
   description             = "KMS key for EKS secrets encryption"
   deletion_window_in_days = 10
@@ -8,41 +10,46 @@ resource "aws_kms_key" "eks" {
     Statement = [
 
       {
-        Sid: "AllowRootFullAccess",
-        Effect: "Allow",
-        Principal: {
-          AWS: "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
+        Sid = "AllowRootFullAccess",
+        Effect = "Allow",
+        Principal = {
+          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
         },
-        Action: "kms:*",
-        Resource: "*"
+        Action = "kms:*",
+        Resource = "*"
       },
 
       {
-        Sid: "AllowKendiFullManagement",
-        Effect: "Allow",
-        Principal: {
-          AWS: "arn:aws:iam::${data.aws_caller_identity.current.account_id}:user/kendi006@gmail.com"
+        Sid = "AllowKendiFullManagement",
+        Effect = "Allow",
+        Principal = {
+          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:user/kendi006@gmail.com"
         },
-        Action: [
+        Action = [
           "kms:*"
         ],
-        Resource: "*"
+        Resource = "*"
       },
 
       {
-        Sid: "AllowEksClusterUseKey",
-        Effect: "Allow",
-        Principal: {
-          AWS: aws_iam_role.eks_cluster.arn
+        Sid = "AllowEksClusterUseKey",
+        Effect = "Allow",
+        Principal = {
+          AWS = aws_iam_role.eks_cluster.arn
         },
-        Action: [
+        Action = [
           "kms:Encrypt",
           "kms:Decrypt",
           "kms:GenerateDataKey*",
           "kms:DescribeKey"
         ],
-        Resource: "*"
+        Resource = "*"
       }
     ]
   })
+}
+
+resource "aws_kms_alias" "eks" {
+  name          = "${var.project_name}-eks-secret-key"
+  target_key_id = aws_kms_key.eks.id
 }

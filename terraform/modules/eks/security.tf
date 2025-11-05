@@ -13,7 +13,7 @@ resource "aws_security_group" "eks_cluster" {
     from_port = 443
     to_port = 443
     protocol = "tcp"
-    security_groups = [aws_security_group.eks_node.id]
+    security_groups = [aws_security_group.eks_nodes.id]
     description = "Allow worker nodes to communicate with control plane"
   }
 
@@ -44,9 +44,11 @@ resource "aws_security_group" "eks_nodes" {
   }
 }
 
-data "external" "my_ip" {
-  program = ["bash", "-c", "curl -s https://checkip.amazonaws.com"]
-}
+/*data "external" "my_ip" {
+  program = ["bash", "-c", "ip=$(curl -s https://checkip.amazonaws.com); echo \"{\\\"ip\\\": \\\"$$ip\\\"}\""]
+}*/
+
+
 
 resource "aws_security_group" "bastion" {
   vpc_id = var.vpc_id
@@ -55,7 +57,7 @@ resource "aws_security_group" "bastion" {
     from_port = 22
     to_port = 22
     protocol = "tcp"
-    cidr_blocks = ["${data.external.my_ip}/32"]
+    cidr_blocks = ["81.182.21.16/32"]
   }
 
   egress {
@@ -66,6 +68,6 @@ resource "aws_security_group" "bastion" {
   }
 
   tags = {
-    Name = "eks-node-sg"
+    Name = "bastion-ec2-sg"
   }
 }

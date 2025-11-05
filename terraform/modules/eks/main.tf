@@ -1,7 +1,3 @@
-resource "aws_eks_addon" "pod_identity_agent" {
-  cluster_name = aws_eks_cluster.this.name
-  addon_name = "eks-pod-identity-agent"
-}
 
 resource "aws_eks_cluster" "this" {
   name = "${var.project_name}-eks-cluster"
@@ -38,7 +34,7 @@ resource "aws_eks_cluster" "this" {
 
 resource "aws_eks_node_group" "taskflow_nodes" {
   cluster_name = aws_eks_cluster.this.name
-  node_group_name = "eks_worker_nodes"
+  node_group_name = "eks-worker-nodes"
   node_role_arn = aws_iam_role.eks_node.arn
   subnet_ids = var.subnet_ids
   instance_types = ["t3.xlarge"]
@@ -60,7 +56,7 @@ update_config {
 
 lifecycle {
   ignore_changes = [ 
-    scaling_config[0].description,
+    scaling_config[0].desired_size,
     scaling_config[0].max_size,
     scaling_config[0].min_size
    ]
@@ -80,4 +76,14 @@ depends_on = [
     aws_iam_role_policy_attachment.eks_cni_policy,
     aws_kms_key.eks
   ]
+}
+
+resource "terraform_data" "configure_kubectl" {
+ count = var.configure_kubectl ? 1 : 0
+ depends_on = [ aws_eks_cluster.this ] 
+
+ provisioner "local-exec" {
+    command = "aws eks --region ${var.aws_region} update-kubeconfig --name ${aws_eks_cluster.this.name} --alias ${var.project_name}-eks-cluster"
+   
+ }
 }
