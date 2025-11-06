@@ -6,7 +6,7 @@ resource "aws_iam_role" "alb_controller" {
     Statement = [{
       Effect = "Allow"
       Principal = {
-        Service = "eks.amazonaws.com"
+        Service = "pods.eks.amazonaws.com"
       }
       Action = ["sts:AssumeRole", "sts:TagSession"]
     }]
@@ -15,7 +15,7 @@ resource "aws_iam_role" "alb_controller" {
 
 resource "aws_iam_role_policy_attachment" "alb_controller_policy" {
   role       = aws_iam_role.alb_controller.name
-  policy_arn = "arn:aws:iam::aws:policy/AWSLoadBalancerControllerIAMPolicy"
+  policy_arn = "arn:aws:iam::536284936715:policy/AWSLoadBalancerControllerIAMPolicy"
 }
 
 resource "aws_eks_pod_identity_association" "alb_controller" {
@@ -23,4 +23,23 @@ resource "aws_eks_pod_identity_association" "alb_controller" {
   namespace       = "kube-system"
   service_account = "alb-controller-sa"
   role_arn        = aws_iam_role.alb_controller.arn
+}
+
+resource "helm_release" "aws_load_balancer_controller" {
+  name       = "aws-load-balancer-controller"
+  repository = "https://aws.github.io/eks-charts"
+  chart      = "aws-load-balancer-controller"
+  namespace  = "kube-system"
+  version    = "1.8.1"
+
+ set = [
+    { name = "clusterName", value = aws_eks_cluster.this.name },
+    { name = "region", value = var.aws_region },
+    { name = "vpcId", value = var.vpc_id },
+    { name = "serviceAccount.create", value = "true" },
+    { name = "serviceAccount.name", value = "alb-controller-sa" },
+    { name = "serviceAccount.roleArn", value = aws_iam_role.alb_controller.arn }
+  ]
+
+  depends_on = [aws_iam_role_policy_attachment.alb_controller_policy]
 }

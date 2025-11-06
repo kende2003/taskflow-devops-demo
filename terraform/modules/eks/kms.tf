@@ -50,6 +50,6 @@ resource "aws_kms_key" "eks" {
 }
 
 resource "aws_kms_alias" "eks" {
-  name          = "${var.project_name}-eks-secret-key"
+  name          = "alias/${var.project_name}-eks-key"
   target_key_id = aws_kms_key.eks.id
 }

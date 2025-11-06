@@ -1,21 +1,21 @@
-variable "subnet_ids" {
-  type = list(string)
-}
+# variable "subnet_ids" {
+#   type = list(string)
+# }
 
-variable "vpc_id" {
-    type = string
-}
+# variable "vpc_id" {
+#   type = string
+# }
 
-variable "vpc_cidr_block" {
-  type = string
-}
+# variable "vpc_cidr_block" {
+#   type = string
+# }
 
-variable "tag_name" {
-  type = string
-}
+# variable "tag_name" {
+#   type = string
+# }
 
-variable "password" {
-  type = string
-  sensitive = true
-}
+# variable "password" {
+#   type = string
+#   sensitive = true
+# }
 

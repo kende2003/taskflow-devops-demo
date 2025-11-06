@@ -48,7 +48,7 @@ resource "aws_subnet" "private_db_a" {
   availability_zone       = "${var.region}a"
 
   tags = {
-    Name = "${var.project_name}-db-a"
+    Name = "${var.project_name}-private-db-a"
   }
 }
 
@@ -58,7 +58,7 @@ resource "aws_subnet" "private_db_b" {
   availability_zone       = "${var.region}b"
 
   tags = {
-    Name = "${var.project_name}-db-b"
+    Name = "${var.project_name}-private-db-b"
   }
 }
 
@@ -68,7 +68,7 @@ resource "aws_subnet" "private_db_c" {
   availability_zone       = "${var.region}c"
 
   tags = {
-    Name = "${var.project_name}-db-c"
+    Name = "${var.project_name}-private-db-c"
   }
 }
 

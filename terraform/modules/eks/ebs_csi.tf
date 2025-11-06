@@ -4,7 +4,7 @@ data "aws_iam_policy_document" "ebs_csi_driver" {
 
     principals {
       type        = "Service"
-      identifiers = ["eks.amazonaws.com"]
+      identifiers = ["pods.eks.amazonaws.com"]
     }
 
     actions = [
@@ -55,10 +55,11 @@ resource "aws_eks_pod_identity_association" "ebs_csi_driver" {
   role_arn        = aws_iam_role.ebs_csi_driver.arn
 }
 
+
 resource "aws_eks_addon" "ebs_csi" {
   cluster_name      = aws_eks_cluster.this.name
   addon_name        = "aws-ebs-csi-driver"
-  //service_account_role_arn = aws_iam_role.ebs_csi_driver.arn
+  service_account_role_arn = aws_iam_role.ebs_csi_driver.arn
 
-  depends_on = [ aws_eks_node_group.taskflow_nodes ]
+  depends_on = [ aws_iam_role.ebs_csi_driver ]
 }
