@@ -30,7 +30,7 @@ output "private_b_subnet_cidr_block" {
   value = aws_subnet.private_b.cidr_block
 }
 
-output "private_db_subnet_ids" {
+/*output "private_db_subnet_ids" {
   value = [
     aws_subnet.private_db_a.id,
     aws_subnet.private_db_b.id,
@@ -44,4 +44,4 @@ output "private_db_subnet_cidr_blocks" {
     aws_subnet.private_db_b.cidr_block,
     aws_subnet.private_db_c.cidr_block
   ]
-}
+}*/

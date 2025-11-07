@@ -42,7 +42,7 @@ resource "aws_subnet" "private_b" {
   }
 }
 
-resource "aws_subnet" "private_db_a" {
+/*resource "aws_subnet" "private_db_a" {
   vpc_id                  = aws_vpc.main.id
   cidr_block              = "10.0.4.0/24"
   availability_zone       = "${var.region}a"
@@ -71,7 +71,7 @@ resource "aws_subnet" "private_db_c" {
     Name = "${var.project_name}-private-db-c"
   }
 }
-
+*/
 resource "aws_internet_gateway" "this" {
   vpc_id = aws_vpc.main.id
 
