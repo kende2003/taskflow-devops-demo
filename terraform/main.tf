@@ -5,17 +5,13 @@ module "vpc" {
   region       = var.region
 }
 
-/*module "rds" {
-  source = "./modules/rds"
+module "db" {
+  source = "./modules/db"
+  db_password = var.db_password
+  db_user     = var.db_user
+  db_storage = var.db_storage
+  }
 
-  vpc_id         = module.vpc.vpc_id
-  vpc_cidr_block = module.vpc.vpc_cidr_block
-  subnet_ids     = module.vpc.private_db_subnet_ids
-  tag_name       = var.project_name
-  password       = var.password
-
-}
-*/
 module "ecr" {
   source = "./modules/ecr"
 

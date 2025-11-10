@@ -14,8 +14,21 @@ variable "project_name" {
   type        = string
 }
 
-variable "password" {
-  description = "Password for the RDS database"
+variable "db_password" {
+  description = "Value for the database password"
   type        = string
   sensitive   = true
+}
+
+variable "db_user" {
+  description = "Value for the database user"
+  type        = string
+  default     = "taskflowdb"  
+}
+
+variable "db_storage" {
+  description = "Value for the database storage size"
+  type        = string
+  default     = "20Gi"
+  
 }

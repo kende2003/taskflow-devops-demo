@@ -4,6 +4,8 @@ resource "kubernetes_namespace" "postgresql_db" {
   metadata {
     name = "postgresql-db"
   }
+
+  depends_on = [ kubernetes_stateful_set.auth_db ]
 }
 resource "kubernetes_secret" "postgres_password" {
   metadata {
@@ -16,8 +18,8 @@ resource "kubernetes_secret" "postgres_password" {
   }
 }
 
-resource "aws_kms_key" "eks" {
-  description             = "KMS key for EKS secrets encryption"
+resource "aws_kms_key" "ebs_encryption" {
+  description             = "KMS key for EBS encryption"
   deletion_window_in_days = 10
   enable_key_rotation     = true
 
@@ -53,19 +55,21 @@ resource "aws_kms_key" "eks" {
       }
     ]
   })
+
+  depends_on = [ kubernetes_storage_class_v1.db_storage_class ]
 }
 
 resource "aws_kms_alias" "eks" {
   name          = "alias/ebs-key"
-  target_key_id = aws_kms_key.eks.id
+  target_key_id = aws_kms_key.ebs_encryption
 }
 
 resource "kubernetes_stateful_set" "auth_db" {
   metadata {
-    name      = "auth-db"
+    name      = "users-db"
     namespace = kubernetes_namespace.postgresql_db.metadata[0].name
     labels = {
-      app = "auth-db"
+      app = "users-db"
     }
   }
 
@@ -75,14 +79,14 @@ resource "kubernetes_stateful_set" "auth_db" {
 
     selector {
       match_labels = {
-        app = "auth-db"
+        app = "users-db"
       }
     }
 
     template {
       metadata {
         labels = {
-          app = "auth-db"
+          app = "users-db"
         }
       }
 
@@ -140,15 +144,15 @@ resource "kubernetes_stateful_set" "auth_db" {
 
 resource "kubernetes_service" "postgresql_headless" {
   metadata {
-    name      = "postgresql"
+    name      = "postgresql-svc"
     namespace = "postgresql-db"
     labels = {
-      app = "postgresql"
+      app = "users-db"
     }
   }
   spec {
     selector = {
-      app = "postgresql"
+      app = "users-db"
     }
     port {
       port        = 5432
@@ -180,5 +184,6 @@ resource "kubernetes_storage_class_v1" "db_storage_class" {
     volume_binding_mode = "WaitForFirstConsumer"
     allow_volume_expansion = true
 }
+
 
 
