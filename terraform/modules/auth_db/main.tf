@@ -5,8 +5,8 @@ resource "kubernetes_namespace" "postgresql_db" {
     name = "postgresql-db"
   }
 
-  depends_on = [ kubernetes_stateful_set.auth_db ]
 }
+
 resource "kubernetes_secret" "postgres_password" {
   metadata {
     name = "postgres-secret"
@@ -16,6 +16,20 @@ resource "kubernetes_secret" "postgres_password" {
   data = {
     POSTGRES_PASSWORD = base64encode(var.db_password)
   }
+  type = "Opaque"
+}
+
+resource "kubernetes_config_map" "db_config" {
+  metadata {
+    name      = "db-config"
+    namespace = kubernetes_namespace.postgresql_db.metadata[0].name
+  }
+
+  data = {
+    DB_NAME = var.db_name
+    DB_USER = var.db_user
+  }
+  
 }
 
 resource "aws_kms_key" "ebs_encryption" {
@@ -31,37 +45,46 @@ resource "aws_kms_key" "ebs_encryption" {
         Sid = "AllowKendiFullManagement",
         Effect = "Allow",
         Principal = {
-          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:user/kendi006@gmail.com"
+          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:user/${var.aws_iam_user}"
         },
         Action = [
           "kms:*"
         ],
         Resource = "*"
       },
-
+      {
+        Sid = "AllowAdminFullManagement",
+        Effect = "Allow",
+        Principal = {
+          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
+        },
+        Action = [
+          "kms:*"
+        ],
+        Resource = "*"
+      },
       {
         Sid = "AllowEksClusterUseKey",
         Effect = "Allow",
         Principal = {
-          AWS = aws_iam_role.eks_cluster.arn
+            AWS = var.eks_node_role_arn
         },
         Action = [
-          "kms:Encrypt",
-          "kms:Decrypt",
-          "kms:GenerateDataKey*",
-          "kms:DescribeKey"
+            "kms:Encrypt",
+            "kms:Decrypt",
+            "kms:GenerateDataKey*",
+            "kms:DescribeKey"
         ],
         Resource = "*"
-      }
+        }
     ]
   })
 
-  depends_on = [ kubernetes_storage_class_v1.db_storage_class ]
 }
 
 resource "aws_kms_alias" "eks" {
   name          = "alias/ebs-key"
-  target_key_id = aws_kms_key.ebs_encryption
+  target_key_id = aws_kms_key.ebs_encryption.id
 }
 
 resource "kubernetes_stateful_set" "auth_db" {
@@ -74,7 +97,7 @@ resource "kubernetes_stateful_set" "auth_db" {
   }
 
   spec {
-    service_name = kubernetes_service.postgresql.metadata[0].name
+    service_name = kubernetes_service.postgresql_headless.metadata[0].name
     replicas     = 1
 
     selector {
@@ -96,12 +119,22 @@ resource "kubernetes_stateful_set" "auth_db" {
           image = "postgres:16"
 
           env {
-            name  = "POSTGRES_DB"
-            value = var.db_name
+            name  = "POSTGRES_USER"
+            value_from {
+              config_map_key_ref {
+                name = kubernetes_config_map.db_config.metadata[0].name
+                key  = "DB_USER"
+              }
+            }
           }
           env {
-            name  = "POSTGRES_USER"
-            value = var.db_user
+            name  = "POSTGRES_DB"
+            value_from {
+              config_map_key_ref {
+                name = kubernetes_config_map.db_config.metadata[0].name
+                key  = "DB_NAME"
+              }
+            }
           }
           env {
             name  = "POSTGRES_PASSWORD"
@@ -136,6 +169,7 @@ resource "kubernetes_stateful_set" "auth_db" {
             storage = var.db_storage
           }
         }
+        storage_class_name = kubernetes_storage_class.db_storage_class.metadata[0].name
       }
     }
   }
@@ -166,7 +200,7 @@ resource "kubernetes_service" "postgresql_headless" {
 
 
 
-resource "kubernetes_storage_class_v1" "db_storage_class" {
+resource "kubernetes_storage_class" "db_storage_class" {
     metadata {
         name = "encrypted-ebs-sc"
     }
@@ -183,6 +217,7 @@ resource "kubernetes_storage_class_v1" "db_storage_class" {
     reclaim_policy = "Retain"
     volume_binding_mode = "WaitForFirstConsumer"
     allow_volume_expansion = true
+
 }
 
 

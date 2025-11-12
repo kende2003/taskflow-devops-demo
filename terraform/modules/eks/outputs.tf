@@ -14,3 +14,8 @@ output "cluster_certificate_authority" {
 output "cluster_auth_token" {
   value = data.aws_eks_cluster_auth.this.token
 }
+
+output "eks_node_role_arn" {
+  value = aws_iam_role.eks_node.arn
+}
+

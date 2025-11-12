@@ -3,7 +3,23 @@ output "postgresql_service_name" {
   value       = kubernetes_service.postgresql_headless.metadata[0].name
 }
 
-output "postgresql_service_host" {
+output "db_name" {
+  description = "PostgreSQL database name"
+  value       = var.db_name
+}
+
+output "db_user" {
+  description = "PostgreSQL database username"
+  value       = var.db_user
+}
+
+output "db_password" {
+  description = "PostgreSQL database password"
+  value       = var.db_password
+  sensitive   = true
+}
+
+output "db_host" {
   description = "The DNS host for PostgreSQL pods."
   value       = "${kubernetes_service.postgresql_headless.metadata[0].name}.${kubernetes_service.postgresql_headless.metadata[0].namespace}.svc.cluster.local"
 }

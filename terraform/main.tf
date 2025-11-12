@@ -5,12 +5,14 @@ module "vpc" {
   region       = var.region
 }
 
-module "db" {
-  source = "./modules/db"
-  db_password = var.db_password
-  db_user     = var.db_user
-  db_storage = var.db_storage
-  }
+module "auth_db" {
+  source            = "./modules/auth_db"
+  eks_node_role_arn = module.eks.eks_node_role_arn
+  db_password       = var.db_password
+  db_user           = var.db_user
+  db_storage        = var.db_storage
+  aws_iam_user = var.aws_iam_user
+}
 
 module "ecr" {
   source = "./modules/ecr"

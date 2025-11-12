@@ -2,7 +2,7 @@ import express from 'express';
 import cookieParser from 'cookie-parser';
 import sequelize from './db.js';
 
-import config from './config/config';
+import config from './config/config.js';
 import {
     Register,
     Login,
@@ -11,7 +11,7 @@ import {
 } from './controllers/users.controllers.js';
 
 const app = express();
-const { PORT, CON_STRING } = config;
+const { PORT } = config;
 const ROUTE_PREFIX = '/api/v1/auth';
 
 app.post(`${ROUTE_PREFIX}/register`, Register);
@@ -22,7 +22,6 @@ app.get(`${ROUTE_PREFIX}/authenticate`, Authenticate);
 app.use(express.json());
 app.use(cookieParser());
 
-app.post()
 
 async function main() {
     try {

@@ -15,8 +15,9 @@ resource "aws_iam_role" "alb_controller" {
 
 resource "aws_iam_role_policy_attachment" "alb_controller_policy" {
   role       = aws_iam_role.alb_controller.name
-  policy_arn = "arn:aws:iam::536284936715:policy/AWSLoadBalancerControllerIAMPolicy"
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSLoadBalancerControllerPolicy"
 }
+
 
 resource "aws_eks_pod_identity_association" "alb_controller" {
   cluster_name    = aws_eks_cluster.this.name
