@@ -95,9 +95,11 @@ This is a demo project inspired by the mobile app Task Flow, designed to showcas
 ### Built With
 
 * [![React][React.js]][React-url]
+* [![Express][Express.js]][Express-url]
 * [![Terraform][Terraform.io]][Terraform-url]
 * [![PostgreSQL][PostgreSQL.org]][PostgreSQL-url]
 * [![JavaScript][JavaScript.com]][JavaScript-url]
+
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -215,9 +217,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE.txt) 
 <!-- CONTACT -->
 ## Contact
 
-Your Name - [@twitter_handle](https://twitter.com/twitter_handle) - email@email_client.com
+Kende Fay - [LinkedIn](https://www.linkedin.com/in/kende-fay/)
 
-Project Link: [https://github.com/github_username/repo_name](https://github.com/github_username/repo_name)
+Project Link: [https://github.com/kende2003/taskflow-devops-demo](https://github.com/kende2003/taskflow-devops-demo)
+
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -266,4 +269,8 @@ A big thanks to the following resources and tools that helped in this project:
 
 [JavaScript.com]: https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black
 [JavaScript-url]: https://developer.mozilla.org/en-US/docs/Web/JavaScript
+
+[Express.js]: https://img.shields.io/badge/Express-000000?style=for-the-badge&logo=express&logoColor=white
+[Express-url]: https://expressjs.com/
+
 
