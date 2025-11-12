@@ -99,6 +99,7 @@ This is a demo project inspired by the mobile app Task Flow, designed to showcas
 * [![Terraform][Terraform.io]][Terraform-url]
 * [![PostgreSQL][PostgreSQL.org]][PostgreSQL-url]
 * [![JavaScript][JavaScript.com]][JavaScript-url]
+* [![AWS][AWS.io]][AWS-url]
 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -273,4 +274,6 @@ A big thanks to the following resources and tools that helped in this project:
 [Express.js]: https://img.shields.io/badge/Express-000000?style=for-the-badge&logo=express&logoColor=white
 [Express-url]: https://expressjs.com/
 
+[AWS.io]: https://img.shields.io/badge/AWS-232F3E?style=for-the-badge&logo=amazon-aws&logoColor=white
+[AWS-url]: https://aws.amazon.com/
 
