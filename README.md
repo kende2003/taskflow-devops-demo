@@ -175,12 +175,13 @@ curl -X POST http://localhost:8080/api/v1/auth/register \
 This project is currently under active development. Below is the planned roadmap for future features:
 
 ### Backend & Microservices
-- [ ] Finish Auth microservice
+- [x] Finish Auth microservice
 - [ ] Build Todos microservice
 - [ ] Integrate Notifications microservice
 - [ ] Setup API Gateway for routing
-- [ ] Implement RBAC (Role-Based Access Control)
-- [ ] Add logging and monitoring
+- [x] Implement RBAC (Role-Based Access Control)
+- [x] CloudWatch monitoring
+- [ ] Collect DB metrics with Prometheus
 - [ ] Add unit and integration tests
 
 ### Frontend / UI
@@ -203,7 +204,7 @@ This project is currently under active development. Below is the planned roadmap
 - [ ] Task comments and attachments
 - [ ] Recurring tasks and reminders
 - [ ] Analytics and reporting dashboard
-- [ ] Multi-user collaboration
+- [ ] User roles with different permissions
 
 See the [open issues](https://github.com/kende2003/taskflow-devops-demo/issues) for a detailed list of proposed features and known issues.
 
