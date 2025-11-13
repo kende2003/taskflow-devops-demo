@@ -80,17 +80,20 @@
 
 <!-- ABOUT THE PROJECT -->
 ## About The Project
-
 [![Product Screenshot][product-screenshot]](https://example.com)  
 *Note: Screenshot is a placeholder for the upcoming UI.*
 
-
 This is a demo project inspired by the mobile app Task Flow, designed to showcase task‑management workflows.
+It demonstrates:
+
+- Microservices architecture (Auth, Todos, Notifications)
+- Cloud deployment with AWS EKS
+- Infrastructure as Code using Terraform
+- Pod Identity / IRSA for secure AWS service access per microservice
+
 ⚠️ **Note:** This project is currently under development; not all features are implemented yet.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
 
 ### Built With
 
@@ -105,46 +108,46 @@ This is a demo project inspired by the mobile app Task Flow, designed to showcas
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
-
 <!-- GETTING STARTED -->
 ## Getting Started
 
 To set up the application locally do the following steps.
 
-1. Clone the repositroy
-
-```bash
-git clone https://github.com/kende2003/taskflow-devops-demo
-cd taskflow-devops-demo
-```
-
 ## Prerequisites
 
-1. **Docker & Docker Compose** installed on your local machine.  
-   - [Docker Desktop](https://www.docker.com/products/docker-desktop)
-   - [Docker Compose](https://docs.docker.com/compose/install/)
+Before starting, ensure you have:
 
-2. Clone the repository:
-
-```bash
-git clone https://github.com/kende2003/taskflow-devops-demo
-cd taskflow-devops-demo
-```
+- AWS Account with permissions to create resources (EKS, RDS, IAM, etc.)
+- AWS CLI installed
+- Terraform installed (for infrastructure provisioning)
+- Nodejs & npm installed
 
 ### Installation
 
-1. Build and start all microservices
+1. Clone the repository
 ```bash
-docker-compose up --build
+git clone https://github.com/kende2003/taskflow-devops-demo
+cd taskflow-devops-demo
 ```
-2. Install NPM packages (only needed if you want to run a service outside docker)
+2. Configure AWS credentials:
 ```bash
-cd backend/auth
-npm install
+aws configure
 ```
+3. Build Docker images for all microservices:
+``` bash
+docker build -t taskflow-auth ./backend/auth
+```
+
+4. Deploy infrastructure and Kubernetes resources with Terraform:
+``` bash
+cd terraform
+terraform init
+terraform apply
+```
+✅ Terraform will automatically create the EKS cluster, namespaces, deployments, services, ingresses, ConfigMaps, Secrets, etc.
+✅ Microservices use Pod Identity (IRSA) for AWS permissions.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 
 
 <!-- USAGE EXAMPLES -->
@@ -166,7 +169,6 @@ curl -X POST http://localhost:8080/api/v1/auth/register \
   -d '{"username": "testuser", "password": "123456"}'
 ```
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 
 
 <!-- ROADMAP -->
