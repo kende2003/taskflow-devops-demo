@@ -45,7 +45,7 @@ resource "kubernetes_deployment" "auth_api" {
       spec {
         container {
           name  = "auth-api"
-          image = var.image
+          image = "auth-api:latest"
           port {
             container_port = 8080
           }
@@ -58,7 +58,7 @@ resource "kubernetes_deployment" "auth_api" {
 
           env_from {
             secret_ref {
-              name = var.db_password
+              name = var.db_secret_name
             }
           }
         }

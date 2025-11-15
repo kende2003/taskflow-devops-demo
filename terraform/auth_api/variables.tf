@@ -20,8 +20,7 @@ variable "db_host" {
   
 }
 
-variable "image" {
-  description = "Docker image for the auth API."
+variable "db_secret_name" {
+  description = "Kubernetes secret name for the PostgreSQL database password."
   type        = string
-  
 }

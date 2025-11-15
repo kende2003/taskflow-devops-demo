@@ -42,7 +42,7 @@ resource "aws_kms_key" "ebs_encryption" {
     Statement = [
 
       {
-        Sid = "AllowKendiFullManagement",
+        Sid = "AllowIAMUserFullManagement",
         Effect = "Allow",
         Principal = {
           AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:user/${var.aws_iam_user}"
@@ -145,7 +145,10 @@ resource "kubernetes_stateful_set" "auth_db" {
               }
             }
           }
-
+          env {
+            name = "PGDATA"
+            value = "/var/lib/postgresql/data/pgdata"
+          }
           port {
             container_port = 5432
           }
@@ -201,23 +204,23 @@ resource "kubernetes_service" "postgresql_headless" {
 
 
 resource "kubernetes_storage_class" "db_storage_class" {
-    metadata {
-        name = "encrypted-ebs-sc"
-    }
+  metadata {
+    name = "encrypted-ebs-sc"
+  }
+  
+  storage_provisioner = "ebs.csi.aws.com"
 
-    storage_provisioner = "ebs.csi.aws.com"
+  parameters = {
+    type      = "gp3"
+    fsType    = "ext4"
+    encrypted = "true"
+    iops      = "5000"
+    kmsKeyId  = aws_kms_key.ebs_encryption.arn
+  }
 
-    parameters = {
-      type = "gp3"
-      fsType = "ext4"
-      encrypted = "true"
-      kmsKeyId = aws_kms_key.ebs_encryption.arn
-    }
-
-    reclaim_policy = "Retain"
-    volume_binding_mode = "WaitForFirstConsumer"
-    allow_volume_expansion = true
-
+  reclaim_policy         = "Delete"
+  volume_binding_mode    = "WaitForFirstConsumer"
+  allow_volume_expansion = true
 }
 
 

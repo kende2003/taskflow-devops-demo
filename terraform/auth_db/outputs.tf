@@ -28,3 +28,7 @@ output "postgresql_namespace" {
   description = "Namespace where PostgreSQL is deployed."
   value       = kubernetes_namespace.postgresql_db.metadata[0].name
 }
+
+output "db_secret_name" {
+  value = kubernetes_secret.postgres_password.metadata[0].name
+}
