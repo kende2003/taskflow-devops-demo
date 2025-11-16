@@ -24,6 +24,7 @@ module "eks" {
   project_name      = var.project_name
   aws_region        = var.region
   aws_cli_profile   = var.profile
+  aws_iam_user = var.aws_iam_user
   configure_kubectl = true
 }
 

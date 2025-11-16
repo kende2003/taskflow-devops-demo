@@ -24,3 +24,9 @@ variable "configure_kubectl" {
   type = bool
   default = true
 }
+
+variable "aws_iam_user" {
+  description = "AWS IAM user for database encryption key access on EBS."
+  type        = string
+
+}

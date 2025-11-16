@@ -39,11 +39,11 @@ resource "aws_eks_node_group" "taskflow_nodes" {
   subnet_ids = var.subnet_ids
   instance_types = ["t3.xlarge"]
   
-  remote_access {
+  /*remote_access {
     ec2_ssh_key = "kencs-eks-key"
     source_security_group_ids = [aws_security_group.bastion.id]
   }
-
+*/
 scaling_config {
   desired_size = 1
   max_size = 4

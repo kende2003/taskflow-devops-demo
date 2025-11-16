@@ -23,7 +23,7 @@ resource "aws_kms_key" "eks" {
         Sid = "AllowKendiFullManagement",
         Effect = "Allow",
         Principal = {
-          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:user/kendi006@gmail.com"
+          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:user/${var.aws_iam_user}"
         },
         Action = [
           "kms:*"
