@@ -22,12 +22,7 @@ variable "db_storage" {
   default     = "10Gi"
 }
 
-variable "eks_node_role_arn" {
-  description = "ARN of the EKS Node IAM Role."
-  type        = string
-}
-
 variable "aws_iam_user" {
-    description = "AWS IAM user for database encryption key access on EBS."
-    type        = string
+  description = "AWS IAM user for database encryption key access on EBS."
+  type        = string
 }

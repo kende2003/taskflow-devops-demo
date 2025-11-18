@@ -1,5 +1,21 @@
 data "aws_caller_identity" "current" {}
 
+data "terraform_remote_state" "infra" {
+  backend = "s3"
+
+  config = {
+    bucket = "taskflow-tf-state-bucket"
+    key    = "infra/terraform.tfstate"
+    region = "eu-central-1"
+  }
+}
+
+locals {
+  eks_node_role_arn = data.terraform_remote_state.infra.outputs.eks_node_role_arn
+  eks_cluster_name  = data.terraform_remote_state.infra.outputs.eks_cluster_name
+}
+
+
 resource "kubernetes_namespace" "postgresql_db" {
   metadata {
     name = "postgresql-db"
@@ -9,12 +25,12 @@ resource "kubernetes_namespace" "postgresql_db" {
 
 resource "kubernetes_secret" "postgres_password" {
   metadata {
-    name = "postgres-secret"
+    name      = "postgres-secret"
     namespace = kubernetes_namespace.postgresql_db.metadata[0].name
   }
 
   data = {
-    POSTGRES_PASSWORD = base64encode(var.db_password)
+    POSTGRES_PASSWORD = var.db_password
   }
   type = "Opaque"
 }
@@ -29,7 +45,7 @@ resource "kubernetes_config_map" "db_config" {
     DB_NAME = var.db_name
     DB_USER = var.db_user
   }
-  
+
 }
 
 resource "aws_kms_key" "ebs_encryption" {
@@ -42,7 +58,7 @@ resource "aws_kms_key" "ebs_encryption" {
     Statement = [
 
       {
-        Sid = "AllowIAMUserFullManagement",
+        Sid    = "AllowIAMUserFullManagement",
         Effect = "Allow",
         Principal = {
           AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:user/${var.aws_iam_user}"
@@ -53,7 +69,7 @@ resource "aws_kms_key" "ebs_encryption" {
         Resource = "*"
       },
       {
-        Sid = "AllowAdminFullManagement",
+        Sid    = "AllowAdminFullManagement",
         Effect = "Allow",
         Principal = {
           AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
@@ -64,19 +80,19 @@ resource "aws_kms_key" "ebs_encryption" {
         Resource = "*"
       },
       {
-        Sid = "AllowEksClusterUseKey",
+        Sid    = "AllowEKSClusterUseKey",
         Effect = "Allow",
         Principal = {
-            AWS = var.eks_node_role_arn
+          AWS = local.eks_node_role_arn
         },
         Action = [
-            "kms:Encrypt",
-            "kms:Decrypt",
-            "kms:GenerateDataKey*",
-            "kms:DescribeKey"
+          "kms:Encrypt",
+          "kms:Decrypt",
+          "kms:GenerateDataKey*",
+          "kms:DescribeKey"
         ],
         Resource = "*"
-        }
+      }
     ]
   })
 
@@ -119,7 +135,7 @@ resource "kubernetes_stateful_set" "auth_db" {
           image = "postgres:16"
 
           env {
-            name  = "POSTGRES_USER"
+            name = "POSTGRES_USER"
             value_from {
               config_map_key_ref {
                 name = kubernetes_config_map.db_config.metadata[0].name
@@ -128,7 +144,7 @@ resource "kubernetes_stateful_set" "auth_db" {
             }
           }
           env {
-            name  = "POSTGRES_DB"
+            name = "POSTGRES_DB"
             value_from {
               config_map_key_ref {
                 name = kubernetes_config_map.db_config.metadata[0].name
@@ -137,7 +153,7 @@ resource "kubernetes_stateful_set" "auth_db" {
             }
           }
           env {
-            name  = "POSTGRES_PASSWORD"
+            name = "POSTGRES_PASSWORD"
             value_from {
               secret_key_ref {
                 name = kubernetes_secret.postgres_password.metadata[0].name
@@ -146,7 +162,7 @@ resource "kubernetes_stateful_set" "auth_db" {
             }
           }
           env {
-            name = "PGDATA"
+            name  = "PGDATA"
             value = "/var/lib/postgresql/data/pgdata"
           }
           port {
@@ -161,7 +177,7 @@ resource "kubernetes_stateful_set" "auth_db" {
       }
     }
 
-    volume_claim_template {   
+    volume_claim_template {
       metadata {
         name = "pgdata"
       }
@@ -194,7 +210,7 @@ resource "kubernetes_service" "postgresql_headless" {
     port {
       port        = 5432
       target_port = 5432
-      protocol = "TCP"
+      protocol    = "TCP"
     }
     cluster_ip = "None"
   }
@@ -207,7 +223,7 @@ resource "kubernetes_storage_class" "db_storage_class" {
   metadata {
     name = "encrypted-ebs-sc"
   }
-  
+
   storage_provisioner = "ebs.csi.aws.com"
 
   parameters = {

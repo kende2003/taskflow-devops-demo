@@ -1,0 +1,55 @@
+name: Deploy Auth Service
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - "backend/auth/**" 
+
+jobs:
+  deploy-auth:
+    runs-on: ubuntu-latest
+
+    steps:
+      # ---- CHECKOUT ----
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ---- AWS LOGIN ----
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-central-1
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v1
+
+      # ---- BUILD DOCKER IMAGE ----
+      - name: Build Docker image
+        run: |
+          cd backend/auth
+          docker build -t auth-api:${{ github.sha }} .
+
+      # ---- PUSH IMAGE TO ECR ----
+      - name: Push Docker image to ECR
+        run: |
+          ECR_REPO="${{ secrets.ECR_REPO_URL }}"   # pl: xxx.dkr.ecr.eu-central-1.amazonaws.com/auth-api
+          docker tag auth-api:${{ github.sha }} $ECR_REPO:${{ github.sha }}
+          docker push $ECR_REPO:${{ github.sha }}
+
+      # ---- TERRAFORM APPLY ----
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+
+      - name: Terraform Init
+        run: |
+          cd terraform
+          terraform init
+
+      - name: Terraform Apply (auto approve)
+        run: |
+          cd terraform
+          terraform apply -auto-approve \
+            -var "auth_image_tag=${{ github.sha }}"

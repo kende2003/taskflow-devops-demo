@@ -14,14 +14,13 @@ const app = express();
 const { PORT } = config;
 const ROUTE_PREFIX = '/api/v1/auth';
 
+app.use(express.json());
+app.use(cookieParser());
+
 app.post(`${ROUTE_PREFIX}/register`, Register);
 app.post(`${ROUTE_PREFIX}/login`, Login);
 app.post(`${ROUTE_PREFIX}/logout`, Logout);
 app.get(`${ROUTE_PREFIX}/authenticate`, Authenticate);
-
-app.use(express.json());
-app.use(cookieParser());
-
 
 async function main() {
     try {
