@@ -52,6 +52,6 @@ jobs:
 
       - name: Terraform apply (auto approve)
         run: |
-          cd terraform
+          cd terraform/infra
           terraform apply -auto-approve \
-            -var "auth_image_tag=${{ github.sha }}"
+            -var "auth_api_image_tag=${{ github.sha }}"

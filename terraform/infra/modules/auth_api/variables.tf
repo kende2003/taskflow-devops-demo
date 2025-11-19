@@ -20,8 +20,7 @@ variable "db_host" {
 
 }
 
-
-/*variable "auth_api_image_tag" {
+variable "auth_api_image_tag" {
   description = "ECR image tag for the auth-api service."
   type        = string
-}*/
+}

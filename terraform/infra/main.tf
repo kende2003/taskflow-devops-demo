@@ -47,6 +47,7 @@ module "auth_api" {
   db_user        = module.auth_db.auth_db_user
   db_password    = module.auth_db.auth_db_password
   db_host        = module.auth_db.auth_db_host
+  auth_api_image_tag = var.auth_image_tag
 
   depends_on = [module.auth_db]
 }

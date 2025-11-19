@@ -47,3 +47,7 @@ variable "aws_iam_user" {
   description = "AWS IAM user."
   type        = string
 }
+
+variable "auth_image_tag" {
+  type = string
+}

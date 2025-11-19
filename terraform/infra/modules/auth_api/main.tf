@@ -48,7 +48,7 @@ resource "kubernetes_deployment" "auth_api" {
       spec {
         container {
           name  = "auth-api"
-          image = "536284936715.dkr.ecr.eu-central-1.amazonaws.com/auth-api:latest"
+          image = "536284936715.dkr.ecr.eu-central-1.amazonaws.com/auth-api:${var.auth_api_image_tag}"
           port {
             container_port = 8080
           }
