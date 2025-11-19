@@ -55,4 +55,5 @@ jobs:
           cd terraform/infra
           terraform apply -auto-approve \
             -var "auth_api_image_tag=${{ github.sha }}" \
-            -var "auth_db_password=${{ secrets.AUTH_DB_PASSWORD }}"
+            -var "auth_db_password=${{ secrets.AUTH_DB_PASSWORD }}" \
+            -var "aws_iam_user=${{ secrets.AWS_IAM_USER }}"
