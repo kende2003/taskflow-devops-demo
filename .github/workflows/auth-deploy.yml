@@ -54,4 +54,5 @@ jobs:
         run: |
           cd terraform/infra
           terraform apply -auto-approve \
-            -var "auth_api_image_tag=${{ github.sha }}"
+            -var "auth_api_image_tag=${{ github.sha }}" \
+            -var "auth_db_password=${{ secrets.AUTH_DB_PASSWORD }}"
