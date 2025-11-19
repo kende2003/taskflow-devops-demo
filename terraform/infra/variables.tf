@@ -48,6 +48,6 @@ variable "aws_iam_user" {
   type        = string
 }
 
-variable "auth_image_tag" {
+variable "auth_api_image_tag" {
   type = string
 }
