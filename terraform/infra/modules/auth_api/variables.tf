@@ -1,4 +1,4 @@
-/*variable "db_name" {
+variable "db_name" {
   description = "Database name for PostgreSQL."
   type        = string
 }
@@ -20,8 +20,8 @@ variable "db_host" {
 
 }
 
-variable "db_secret_name" {
-  description = "Kubernetes secret name for the PostgreSQL database password."
+
+/*variable "auth_api_image_tag" {
+  description = "ECR image tag for the auth-api service."
   type        = string
-}
-*/
+}*/

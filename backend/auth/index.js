@@ -1,7 +1,6 @@
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import sequelize from './db.js';
-
 import config from './config/config.js';
 import {
     Register,

@@ -4,7 +4,5 @@ terraform {
     key            = "infra/terraform.tfstate"
     region         = "eu-central-1"
     dynamodb_table = "taskflow-tf-lock-table"
-
-    depends_on = []
   }
 }

@@ -1,5 +1,5 @@
-resource "aws_ecr_repository" "this" {
-  name                 = "${var.project_name}-ecr"
+resource "aws_ecr_repository" "auth_api_repo" {
+  name                 = "auth-api"
   image_tag_mutability = "MUTABLE"
   force_delete = true
 
@@ -8,6 +8,6 @@ resource "aws_ecr_repository" "this" {
   }
 
   tags = {
-    Name = "${var.project_name}-ecr"
+    Name = "auth-api"
   }
 }

@@ -1,32 +1,16 @@
 data "aws_caller_identity" "current" {}
 
-data "terraform_remote_state" "infra" {
-  backend = "s3"
-
-  config = {
-    bucket = "taskflow-tf-state-bucket"
-    key    = "infra/terraform.tfstate"
-    region = "eu-central-1"
-  }
-}
-
-locals {
-  eks_node_role_arn = data.terraform_remote_state.infra.outputs.eks_node_role_arn
-  eks_cluster_name  = data.terraform_remote_state.infra.outputs.eks_cluster_name
-}
-
-
-resource "kubernetes_namespace" "postgresql_db" {
+resource "kubernetes_namespace" "auth_db" {
   metadata {
-    name = "postgresql-db"
+    name = "auth-db"
   }
 
 }
 
-resource "kubernetes_secret" "postgres_password" {
+resource "kubernetes_secret" "auth_db_password" {
   metadata {
-    name      = "postgres-secret"
-    namespace = kubernetes_namespace.postgresql_db.metadata[0].name
+    name      = "auth-db-secret"
+    namespace = kubernetes_namespace.auth_db.metadata[0].name
   }
 
   data = {
@@ -37,8 +21,8 @@ resource "kubernetes_secret" "postgres_password" {
 
 resource "kubernetes_config_map" "db_config" {
   metadata {
-    name      = "db-config"
-    namespace = kubernetes_namespace.postgresql_db.metadata[0].name
+    name      = "auth-db-config"
+    namespace = kubernetes_namespace.auth_db.metadata[0].name
   }
 
   data = {
@@ -83,7 +67,7 @@ resource "aws_kms_key" "ebs_encryption" {
         Sid    = "AllowEKSClusterUseKey",
         Effect = "Allow",
         Principal = {
-          AWS = local.eks_node_role_arn
+          AWS = var.eks_node_role_arn
         },
         Action = [
           "kms:Encrypt",
@@ -103,17 +87,19 @@ resource "aws_kms_alias" "eks" {
   target_key_id = aws_kms_key.ebs_encryption.id
 }
 
-resource "kubernetes_stateful_set" "auth_db" {
+resource "kubernetes_stateful_set" "users_db" {
   metadata {
     name      = "users-db"
-    namespace = kubernetes_namespace.postgresql_db.metadata[0].name
+    namespace = kubernetes_namespace.auth_db.metadata[0].name
     labels = {
       app = "users-db"
     }
   }
 
+  wait_for_rollout            = true
+  
   spec {
-    service_name = kubernetes_service.postgresql_headless.metadata[0].name
+    service_name = kubernetes_service.auth_db_headless_service.metadata[0].name
     replicas     = 1
 
     selector {
@@ -132,7 +118,7 @@ resource "kubernetes_stateful_set" "auth_db" {
       spec {
         container {
           name  = "postgres"
-          image = "postgres:16"
+          image = "postgres:16-alpine"
 
           env {
             name = "POSTGRES_USER"
@@ -156,7 +142,7 @@ resource "kubernetes_stateful_set" "auth_db" {
             name = "POSTGRES_PASSWORD"
             value_from {
               secret_key_ref {
-                name = kubernetes_secret.postgres_password.metadata[0].name
+                name = kubernetes_secret.auth_db_password.metadata[0].name
                 key  = "POSTGRES_PASSWORD"
               }
             }
@@ -168,12 +154,21 @@ resource "kubernetes_stateful_set" "auth_db" {
           port {
             container_port = 5432
           }
-
+           readiness_probe {
+            tcp_socket {
+              port = 5432
+            }
+            initial_delay_seconds = 5
+            period_seconds        = 10
+            timeout_seconds       = 2
+            failure_threshold     = 6
+          }
           volume_mount {
             name       = "pgdata"
             mount_path = "/var/lib/postgresql/data"
           }
         }
+        
       }
     }
 
@@ -188,17 +183,17 @@ resource "kubernetes_stateful_set" "auth_db" {
             storage = var.db_storage
           }
         }
-        storage_class_name = kubernetes_storage_class.db_storage_class.metadata[0].name
+        storage_class_name = kubernetes_storage_class.auth_db_storage_class.metadata[0].name
       }
     }
   }
 }
 
 
-resource "kubernetes_service" "postgresql_headless" {
+resource "kubernetes_service" "auth_db_headless_service" {
   metadata {
-    name      = "postgresql-svc"
-    namespace = "postgresql-db"
+    name      = "auth-db-svc"
+    namespace = kubernetes_namespace.auth_db.metadata[0].name
     labels = {
       app = "users-db"
     }
@@ -216,10 +211,7 @@ resource "kubernetes_service" "postgresql_headless" {
   }
 }
 
-
-
-
-resource "kubernetes_storage_class" "db_storage_class" {
+resource "kubernetes_storage_class" "auth_db_storage_class" {
   metadata {
     name = "encrypted-ebs-sc"
   }

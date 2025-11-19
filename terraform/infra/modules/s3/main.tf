@@ -10,7 +10,7 @@ resource "aws_s3_bucket_acl" "s3_acl" {
   acl    = "private"
 }
 
-resource "aws_s3_bucket_versioning" "versioning_example" {
+resource "aws_s3_bucket_versioning" "s3_versioning" {
   bucket = aws_s3_bucket.tf_state.id
   versioning_configuration {
     status = "Enabled"

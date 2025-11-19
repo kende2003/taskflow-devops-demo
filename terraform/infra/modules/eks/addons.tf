@@ -18,9 +18,6 @@
    cluster_name = aws_eks_cluster.this.name
    addon_name   = "amazon-cloudwatch-observability"
 
-   configuration_values = jsonencode({
-    "enableContainerInsights" = true
-  })
  }
 
 resource "aws_eks_addon" "pod_identity_agent" {

@@ -26,29 +26,31 @@ jobs:
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v1
 
-      # ---- BUILD DOCKER IMAGE ----
-      - name: Build Docker image
+      - name: Build docker image
         run: |
           cd backend/auth
           docker build -t auth-api:${{ github.sha }} .
 
-      # ---- PUSH IMAGE TO ECR ----
       - name: Push Docker image to ECR
         run: |
           ECR_REPO="${{ secrets.ECR_REPO_URL }}"   # pl: xxx.dkr.ecr.eu-central-1.amazonaws.com/auth-api
           docker tag auth-api:${{ github.sha }} $ECR_REPO:${{ github.sha }}
           docker push $ECR_REPO:${{ github.sha }}
 
-      # ---- TERRAFORM APPLY ----
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
 
-      - name: Terraform Init
+      - name: Terraform init
         run: |
-          cd terraform
+          cd terraform/infra
           terraform init
 
-      - name: Terraform Apply (auto approve)
+      - name: Terraform validate
+        run: |
+          cd terraform/infra
+          terraform validate
+
+      - name: Terraform apply (auto approve)
         run: |
           cd terraform
           terraform apply -auto-approve \
